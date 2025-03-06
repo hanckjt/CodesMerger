@@ -12,7 +12,7 @@ import queue
 import time
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Union
 from loguru import logger
 from tqdm import tqdm
 import fnmatch
@@ -29,32 +29,32 @@ class CodesMerger:
     
     def __init__(
             self, 
-            source_dir: Path, 
+            source_dir: Union[str, Path], 
             output_file: str, 
-            languages: List[str] = None,
-            file_patterns: List[str] = None,
+            languages: Optional[List[str]] = None,
+            file_patterns: Optional[List[str]] = None,
             split_size: int = 0,
             n_threads: int = 4,
-            ignore_patterns: List[str] = None,
+            ignore_patterns: Optional[List[str]] = None,
             force_overwrite: bool = False
         ):
         '''
         初始化代码合并器
         
         :param source_dir: 源代码目录
-        :type source_dir: Path
+        :type source_dir: Union[str, Path]
         :param output_file: 输出的Markdown文件名
         :type output_file: str
         :param languages: 语言类型列表
-        :type languages: List[str]
+        :type languages: Optional[List[str]]
         :param file_patterns: 文件匹配模式列表
-        :type file_patterns: List[str]
+        :type file_patterns: Optional[List[str]]
         :param split_size: 分割大小(KB)
         :type split_size: int
         :param n_threads: 线程数量
         :type n_threads: int
         :param ignore_patterns: 要忽略的文件或目录模式
-        :type ignore_patterns: List[str]
+        :type ignore_patterns: Optional[List[str]]
         :param force_overwrite: 是否强制覆盖已存在的输出文件
         :type force_overwrite: bool
         '''

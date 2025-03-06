@@ -1,0 +1,43 @@
+# Codes Merger 配置文件示例
+
+# 源目录或Git仓库URL
+source_dir: '/path/to/project'
+
+# 输出文件
+output: 'merged_code.md'
+
+# 要包含的语言（至少需要指定languages或patterns中的一个）
+languages:
+  - python
+  - javascript
+  - cpp
+
+# 文件匹配模式
+patterns:
+  - '*.py'
+  - '*test*.js'
+  - '*.hpp'
+
+# 忽略的文件或目录模式
+ignore:
+  - 'venv'
+  - 'node_modules'
+  - '*.log'
+  - '*.temp'
+  - '.git'
+
+# 文件分割大小(KB)，0表示不分割
+split_size: 0
+
+# 处理线程数
+threads: 4
+
+# 日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+log_level: 'INFO'
+
+# 是否强制覆盖现有文件
+force: false
+
+# Git相关配置
+branch: 'main'            # Git分支
+keep_git_cache: false     # 是否保留Git缓存目录
