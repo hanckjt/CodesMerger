@@ -180,7 +180,40 @@ class CodesMerger:
         try:
             # 获取相对路径，用于Markdown中显示
             relative_path = file_path.relative_to(self.source_dir)
-            content = get_file_content(file_path)
+            content = None
+            
+            # 尝试获取文件内容
+            try:
+                content = get_file_content(file_path)
+            except UnicodeError as ue:
+                # 处理UTF-16编码问题
+                if "UTF-16" in str(ue):
+                    logger.debug(f"尝试以UTF-16编码读取文件: {relative_path}")
+                    try:
+                        # 尝试以UTF-16LE (Little Endian)编码读取
+                        with open(file_path, 'r', encoding='utf-16-le', errors='replace') as f:
+                            content = f.read()
+                        logger.debug(f"成功以UTF-16LE编码读取文件: {relative_path}")
+                    except Exception as e2:
+                        try:
+                            # 尝试以UTF-16BE (Big Endian)编码读取
+                            with open(file_path, 'r', encoding='utf-16-be', errors='replace') as f:
+                                content = f.read()
+                            logger.debug(f"成功以UTF-16BE编码读取文件: {relative_path}")
+                        except Exception as e3:
+                            # 都失败了，使用二进制读取并以errors='replace'解码
+                            logger.warning(f"无法以UTF-16编码读取文件 {relative_path}，尝试二进制读取: {e3}")
+                            with open(file_path, 'rb') as f:
+                                raw_content = f.read()
+                                # 尝试检测编码并使用'replace'模式解码
+                                for enc in ['utf-8', 'utf-16-le', 'utf-16-be', 'latin1']:
+                                    try:
+                                        content = raw_content.decode(enc, errors='replace')
+                                        break
+                                    except:
+                                        continue
+                else:
+                    raise  # 如果不是UTF-16相关错误，重新抛出
             
             if not content:
                 logger.warning(f'文件 {relative_path} 为空或无法读取')
@@ -203,7 +236,8 @@ class CodesMerger:
         
         except Exception as e:
             logger.error(f'处理文件 {file_path} 时发生错误: {e}')
-            raise
+            # 只记录错误但不抛出，以便工作线程可以继续处理其他文件
+            # 这样一个文件的失败不会导致整个合并过程失败
     
     def worker(self, file_writer: FileWriter):
         '''
@@ -226,8 +260,8 @@ class CodesMerger:
                 break
             except Exception as e:
                 logger.error(f'工作线程发生错误: {e}')
-                self.files_queue.task_done()
-                raise
+                # self.files_queue.task_done()
+                # raise
     
     def run(self) -> None:
         '''
